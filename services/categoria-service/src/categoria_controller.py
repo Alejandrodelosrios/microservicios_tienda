@@ -9,6 +9,9 @@ RUTA_ID = re.compile(r"^/categorias/(\d+)$")
 
 
 class CategoriaController(BaseHTTPRequestHandler):
+    """Solo debe ser invocado por API-Gateway. No expone CORS: no esta
+    pensado para ser llamado directamente desde el navegador."""
+
     def do_GET(self):
         if self.path == "/categorias":
             self.listar_categoria_handler()
@@ -38,13 +41,6 @@ class CategoriaController(BaseHTTPRequestHandler):
             self.handler_error(404, "Ruta no encontrada")
             return
         self.eliminar_categoria_handler(int(match.group(1)))
-
-    def do_OPTIONS(self):
-        self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.end_headers()
 
     # ---- Handlers: uno por accion, alineados con
     #      MicroServicio_Categoria::Negocio::CategoriaController del diagrama ----
@@ -90,7 +86,6 @@ class CategoriaController(BaseHTTPRequestHandler):
         cuerpo = json.dumps(data).encode("utf-8")
         self.send_response(codigo_http)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-Length", str(len(cuerpo)))
         self.end_headers()
         self.wfile.write(cuerpo)

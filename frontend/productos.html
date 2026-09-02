@@ -6,9 +6,15 @@
   <title>Gestión de Productos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="productos.css">
+  <link rel="stylesheet" href="css/nav.css">
+  <link rel="stylesheet" href="css/productos.css">
 </head>
 <body>
+  <nav class="nav-bar">
+    <a class="nav-link" href="categorias.html">Categorías</a>
+    <a class="nav-link" href="productos.html">Productos</a>
+  </nav>
+
   <div class="wrap">
 
     <div class="topbar">
@@ -65,9 +71,11 @@
     </div>
   </div>
 
-  <script src="ProductoDTO.js"></script>
-  <script src="ApiGatewayProducto.js"></script>
-  <script src="ProductAdapter.js"></script>
-  <script src="ProductoControladorUI.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/producto-dto.js"></script>
+  <script src="js/api-gateway-client.js"></script>
+  <script src="js/producto-adapter.js"></script>
+  <script src="js/producto-controlador.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 </html>

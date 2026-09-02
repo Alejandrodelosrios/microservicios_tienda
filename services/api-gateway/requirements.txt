@@ -1,0 +1,2 @@
+# Sin dependencias externas: solo libreria estandar de Python
+# (http.server, urllib, json, re).

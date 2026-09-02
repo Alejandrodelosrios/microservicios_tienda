@@ -1,10 +1,10 @@
+import os
 from http.server import HTTPServer
 
 from producto_controller import ProductoController
 
 
-# Puerto diferente al MS-Categoria (8085).
-PUERTO = 8086
+PUERTO = int(os.environ.get("PRODUCTO_SERVICE_PORT", 8086))
 
 
 def main():

@@ -1,13 +1,12 @@
 from http.server import HTTPServer
 
-from categoria_controller import CategoriaController
-
-PUERTO = 8085
+import config
+from gateway_controller import GatewayController
 
 
 def main():
-    servidor = HTTPServer(("localhost", PUERTO), CategoriaController)
-    print(f"Microservicio de categoria iniciado en http://localhost:{PUERTO}")
+    servidor = HTTPServer(("localhost", config.GATEWAY_PORT), GatewayController)
+    print(f"API Gateway iniciado en http://localhost:{config.GATEWAY_PORT}")
     try:
         servidor.serve_forever()
     except KeyboardInterrupt:

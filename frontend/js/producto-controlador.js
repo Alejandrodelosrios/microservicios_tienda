@@ -13,11 +13,10 @@ class ProductoControladorUI {
 
     this.seleccionado = null;
 
-    // API Gateway que comunica con:
-    // MS-Producto    -> puerto 8086
-    // MS-Categoria   -> puerto 8085
+    // Unico cliente HTTP del frontend: habla solo con API-Gateway,
+    // que a su vez reenvia a MS-Producto y MS-Categoria.
     this.apiGateway =
-      new ApiGatewayProducto();
+      new ApiGatewayClient();
 
     // Adapter encargado de pintar los productos
     this.adapter =
@@ -180,9 +179,7 @@ class ProductoControladorUI {
 
   /**
    * Obtiene los productos desde
-   * MS-Producto.
-   *
-   * GET http://localhost:8086/productos
+   * API-Gateway (/productos).
    */
   async cargarProducto() {
 
@@ -237,9 +234,7 @@ class ProductoControladorUI {
 
   /**
    * Obtiene un producto puntual desde
-   * MS-Producto.
-   *
-   * GET http://localhost:8086/productos/{codigo}
+   * API-Gateway (/productos/{codigo}).
    */
   async obtenerProducto(codigo) {
 
@@ -276,9 +271,7 @@ class ProductoControladorUI {
 
   /**
    * Obtiene las categorías desde
-   * MS-Categoria.
-   *
-   * GET http://localhost:8085/categorias
+   * API-Gateway (/categorias).
    */
   async cargarCategoria() {
 
@@ -314,58 +307,28 @@ class ProductoControladorUI {
 
     } catch (error) {
 
-      console.warn(
+      console.error(
         "No se pudieron cargar categorías:",
         error
       );
 
-
       /*
-       * Datos de respaldo.
-       *
-       * Se utilizan únicamente si
-       * MS-Categoria no responde.
-       *
-       * IMPORTANTE:
-       * ahora utilizamos "codigo"
-       * porque esa es la propiedad
-       * que devuelve tu backend.
+       * Sin categorías reales no se puede garantizar que un
+       * categoria_codigo enviado sea válido, así que ya no se
+       * rellena el <select> con una lista de respaldo inventada:
+       * eso permitiría crear productos con categorías inexistentes,
+       * justo lo que la validación centralizada en API-Gateway
+       * busca impedir.
        */
-      const categorias = [
-
-        {
-          codigo: 1,
-          nombre: "Bebidas"
-        },
-
-        {
-          codigo: 2,
-          nombre: "Alimentos"
-        },
-
-        {
-          codigo: 3,
-          nombre: "Limpieza"
-        },
-
-        {
-          codigo: 4,
-          nombre: "Electrónica"
-        },
-
-        {
-          codigo: 5,
-          nombre: "Otros"
-        }
-
-      ];
-
-
-      this.adapter.setCategorias(
-        categorias
-      );
+      this.adapter.setCategorias([]);
 
       this.pintarCategorias();
+
+      this.mostrarMensaje(
+        "No se pudieron cargar categorías: " +
+        error.message,
+        "error"
+      );
     }
   }
 
@@ -538,8 +501,6 @@ class ProductoControladorUI {
 
   /**
    * Elimina un producto.
-   *
-  * DELETE http://localhost:8086/productos/{codigo}
    */
   async eliminarProducto(codigo) {
 

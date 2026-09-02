@@ -1,6 +1,6 @@
 class CategoriaControladorUI {
   constructor() {
-    this.gateway = new ApiGateway();
+    this.gateway = new ApiGatewayClient();
     this.adapter = new CategoriaAdapter(document.querySelector("#tabla-categorias tbody"));
     this.inputNombre = document.querySelector("#input-nombre");
     this.inputBusqueda = document.querySelector("#input-busqueda");

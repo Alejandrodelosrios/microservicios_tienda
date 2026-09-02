@@ -1,22 +1,27 @@
 import json
-import os
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+import config
+
 
 class CategoriaServicioNoDisponible(Exception):
-    """El MS-Categoria no respondió o no se pudo contactar."""
+    """El MS-Categoria no respondio o no se pudo contactar."""
     pass
 
 
-class CategoriaClient:
+class CategoriaGatewayCliente:
+    """Unico componente de todo el sistema autorizado a preguntarle a
+    MS-Categoria si un codigo de categoria existe. Vive en el
+    API-Gateway porque es la capa de orquestacion, no un microservicio
+    par de MS-Producto (antes esta clase vivia en MS-Producto como
+    CategoriaClient; ese acoplamiento directo entre microservicios
+    quedo prohibido)."""
 
     def __init__(self, base_url=None):
-        self.base_url = (
-            base_url or os.getenv("CATEGORIA_URL", "http://localhost:8085")
-        ).rstrip("/")
+        self.base_url = (base_url or config.CATEGORIA_SERVICE_URL).rstrip("/")
 
-    def existeCategoria(self, codigo):
+    def existe_categoria(self, codigo):
         url = f"{self.base_url}/categorias/{codigo}"
         request = Request(url, method="GET", headers={"Accept": "application/json"})
         try:

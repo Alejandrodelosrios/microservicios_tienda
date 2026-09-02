@@ -1,19 +1,20 @@
 from producto_dao import ProductoDao
 from entidad_producto import Producto
-from categoria_client import CategoriaClient, CategoriaServicioNoDisponible
 
 
 class ProductoN:
     """
     Capa NEGOCIO.
 
-    Coordina ProductoDao con CategoriaClient para validar
-    que la categoria exista antes de crear o actualizar.
+    Valida forma/tipo de nombre, precio y categoria_codigo. Ya NO valida
+    que la categoria exista - esa responsabilidad ahora vive en
+    API-Gateway (producto_orquestador.py), que es el unico componente
+    autorizado a llamar a MS-Categoria. Esta clase nunca debe volver a
+    depender de otro microservicio.
     """
 
     def __init__(self):
         self.dao = ProductoDao()
-        self.categoriaClient = CategoriaClient()
 
     def listarProducto(self):
         return self.dao.listar()
@@ -22,7 +23,7 @@ class ProductoN:
         return self.dao.obtener_por_codigo(codigo)
 
     def _validar_datos(self, prod):
-        """Valida nombre, precio y categoria. Devuelve (nombre, precio, categoria_codigo, error)."""
+        """Valida forma/tipo de nombre, precio y categoria_codigo. Devuelve (nombre, precio, categoria_codigo, error)."""
         nombre = (prod.get("nombre") or "").strip()
         precio = prod.get("precio")
         categoria_codigo = prod.get("categoria_codigo")
@@ -42,14 +43,6 @@ class ProductoN:
             categoria_codigo = int(categoria_codigo)
         except (TypeError, ValueError):
             return None, None, None, "La categoria_codigo debe ser un numero entero."
-
-        try:
-            existe = self.categoriaClient.existeCategoria(categoria_codigo)
-        except CategoriaServicioNoDisponible:
-            return None, None, None, "servicio_no_disponible"
-
-        if not existe:
-            return None, None, None, "La categoria no existe."
 
         return nombre, precio, categoria_codigo, None
 

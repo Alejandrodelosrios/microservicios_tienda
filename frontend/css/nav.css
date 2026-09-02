@@ -1,0 +1,24 @@
+.nav-bar {
+  padding: 20px 24px 0;
+  display: flex;
+  gap: 8px;
+}
+
+.nav-link {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #6B7268;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.nav-link:hover {
+  background: #EDEAE1;
+}
+
+.nav-link.activo {
+  background: #1E2A24;
+  color: #F5F4F1;
+}

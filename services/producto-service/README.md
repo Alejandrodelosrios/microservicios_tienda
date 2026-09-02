@@ -16,20 +16,14 @@ El resto utiliza librerias de Python:
 - http.server
 - json
 - re
-- urllib.request
-- urllib.error
 
 ## Puerto
 
-MS-Categoria:
-```text
-http://localhost:8085
-```
-
-MS-Producto:
 ```text
 http://localhost:8086
 ```
+
+Configurable con la variable de entorno `PRODUCTO_SERVICE_PORT`.
 
 ## Arquitectura
 
@@ -38,14 +32,21 @@ ProductoController
         |
         v
      ProductoN
-      /     \
-     v       v
-ProductoDao  CategoriaClient
-     |             |
-     v             v
- PostgreSQL    MS-Categoria
-              localhost:8085
+        |
+        v
+   ProductoDao
+        |
+        v
+   PostgreSQL
 ```
+
+Este microservicio **no llama a ningun otro microservicio**. Solo debe
+ser invocado por `services/api-gateway`, nunca directamente desde el
+frontend ni desde otro microservicio (por eso no expone CORS).
+
+La validacion de que `categoria_codigo` corresponda a una categoria
+existente ya no ocurre aqui: la hace API-Gateway (`producto_orquestador.py`)
+antes de reenviar la peticion de creacion/actualizacion a este servicio.
 
 ## Endpoints
 
@@ -93,22 +94,12 @@ Content-Type: application/json
 DELETE http://localhost:8086/productos/1
 ```
 
-## Comunicación entre microservicios
-
-Antes de crear o actualizar un producto,
-`ProductoN` utiliza `CategoriaClient.existeCategoria(codigo)`
-para consultar:
-
-```text
-GET http://localhost:8085/categorias/{codigo}
-```
-
-Por lo tanto, para probar Producto con validación de categoría,
-primero debe estar ejecutándose MS-Categoria en el puerto 8085.
-
 ## Base de datos
 
-Editar `conexion.py` con los datos reales de PostgreSQL.
+Editar las variables de entorno `PRODUCTO_DB_HOST`, `PRODUCTO_DB_PORT`,
+`PRODUCTO_DB_NAME`, `PRODUCTO_DB_USER`, `PRODUCTO_DB_PASSWORD` con los
+datos reales de PostgreSQL (ver `conexion.py` y el `.env.example` en la
+raíz del repo).
 
 La implementación espera una tabla con una estructura equivalente a:
 
@@ -124,4 +115,5 @@ CREATE TABLE producto (
 Si tu tabla utiliza otro nombre de columna para la relación con
 categoria, modifica únicamente las consultas de `producto_dao.py`.
 
-para correr se usa python producto_servidor.py
+Para correr: `python src/producto_servidor.py` (desde
+`services/producto-service`).

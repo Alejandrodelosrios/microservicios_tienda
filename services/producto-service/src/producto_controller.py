@@ -10,10 +10,10 @@ RUTA_ID = re.compile(r"^/productos/(\d+)$")
 
 
 class ProductoController(BaseHTTPRequestHandler):
+    """Solo debe ser invocado por API-Gateway. No expone CORS: no esta
+    pensado para ser llamado directamente desde el navegador."""
 
     def _mapear_codigo_http(self, error):
-        if error == "servicio_no_disponible":
-            return 503
         if "no existe" in error:
             return 404
         return 400
@@ -57,22 +57,6 @@ class ProductoController(BaseHTTPRequestHandler):
             return
 
         self.eliminarProductoHandler(int(match.group(1)))
-
-    def do_OPTIONS(self):
-        self.send_response(204)
-        self.send_header(
-            "Access-Control-Allow-Origin",
-            "*",
-        )
-        self.send_header(
-            "Access-Control-Allow-Methods",
-            "GET, POST, PUT, DELETE, OPTIONS",
-        )
-        self.send_header(
-            "Access-Control-Allow-Headers",
-            "Content-Type",
-        )
-        self.end_headers()
 
     # ---- Handlers: uno por accion, alineados con
     #      Negocio::ProductoController del diagrama ----
@@ -147,11 +131,6 @@ class ProductoController(BaseHTTPRequestHandler):
         self.send_header(
             "Content-Type",
             "application/json; charset=utf-8",
-        )
-
-        self.send_header(
-            "Access-Control-Allow-Origin",
-            "*",
         )
 
         self.send_header(
