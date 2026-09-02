@@ -62,3 +62,35 @@ curl http://localhost:8080/productos
 Un `POST http://localhost:8080/productos` con un `categoria_codigo`
 inexistente debe responder `400` sin llegar a crear el producto; si
 `categoria-service` está caído, debe responder `503`.
+
+## Cómo correr con Docker
+
+Requiere Docker y Docker Compose. Un solo comando levanta las dos
+bases de datos, los tres servicios y el frontend.
+
+1. Copiar `.env.example` a `.env`. Trae `CATEGORIA_DB_PASSWORD` y
+   `PRODUCTO_DB_PASSWORD` en `postgres` (valor de desarrollo local);
+   cambialos antes de desplegar en un entorno accesible desde fuera —
+   no pueden quedar vacios, la imagen de Postgres no arranca sin
+   contraseña de superusuario.
+2. `docker compose up -d --build`
+3. Abrir `http://localhost:3000` (o el puerto de `FRONTEND_HOST_PORT`
+   si lo cambiaste).
+
+Si cambias `GATEWAY_HOST_PORT`, actualiza también `GATEWAY_PUBLIC_URL`
+en `.env` — es el valor que usa el navegador, no se deduce
+automáticamente del mapeo de puertos.
+
+`categoria-service` y `producto-service` no publican puertos al host:
+solo son alcanzables desde `api-gateway` a través de la red interna
+de Docker.
+
+### Verificación rápida (Docker)
+
+```bash
+curl http://localhost:8080/categorias
+curl http://localhost:8080/productos
+docker compose exec frontend cat /usr/share/nginx/html/js/config.js
+curl http://localhost:8085/categorias   # debe fallar (connection refused)
+curl http://localhost:8086/productos    # debe fallar (connection refused)
+```

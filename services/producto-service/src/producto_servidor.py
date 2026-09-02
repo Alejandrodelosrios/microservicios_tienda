@@ -9,7 +9,7 @@ PUERTO = int(os.environ.get("PRODUCTO_SERVICE_PORT", 8086))
 
 def main():
     servidor = HTTPServer(
-        ("localhost", PUERTO),
+        ("0.0.0.0", PUERTO),
         ProductoController,
     )
 

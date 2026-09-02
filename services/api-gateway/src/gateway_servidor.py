@@ -5,7 +5,7 @@ from gateway_controller import GatewayController
 
 
 def main():
-    servidor = HTTPServer(("localhost", config.GATEWAY_PORT), GatewayController)
+    servidor = HTTPServer(("0.0.0.0", config.GATEWAY_PORT), GatewayController)
     print(f"API Gateway iniciado en http://localhost:{config.GATEWAY_PORT}")
     try:
         servidor.serve_forever()

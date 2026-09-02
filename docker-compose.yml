@@ -1,0 +1,124 @@
+services:
+  categoria-db:
+    image: postgres:16-alpine
+    container_name: categoria-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${CATEGORIA_DB_NAME:-pos_tienda}
+      POSTGRES_USER: ${CATEGORIA_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${CATEGORIA_DB_PASSWORD:?Defini CATEGORIA_DB_PASSWORD en .env}
+    volumes:
+      - categoria-db-data:/var/lib/postgresql/data
+      - ./services/categoria-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CATEGORIA_DB_USER:-postgres} -d ${CATEGORIA_DB_NAME:-pos_tienda}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  producto-db:
+    image: postgres:16-alpine
+    container_name: producto-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PRODUCTO_DB_NAME:-tienda_productos}
+      POSTGRES_USER: ${PRODUCTO_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${PRODUCTO_DB_PASSWORD:?Defini PRODUCTO_DB_PASSWORD en .env}
+    volumes:
+      - producto-db-data:/var/lib/postgresql/data
+      - ./services/producto-service/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PRODUCTO_DB_USER:-postgres} -d ${PRODUCTO_DB_NAME:-tienda_productos}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  categoria-service:
+    build:
+      context: ./services/categoria-service
+    container_name: categoria-service
+    restart: unless-stopped
+    environment:
+      CATEGORIA_SERVICE_PORT: 8085
+      CATEGORIA_DB_HOST: categoria-db
+      CATEGORIA_DB_PORT: 5432
+      CATEGORIA_DB_NAME: ${CATEGORIA_DB_NAME:-pos_tienda}
+      CATEGORIA_DB_USER: ${CATEGORIA_DB_USER:-postgres}
+      CATEGORIA_DB_PASSWORD: ${CATEGORIA_DB_PASSWORD}
+    expose:
+      - "8085"
+    depends_on:
+      categoria-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8085/categorias', timeout=2)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  producto-service:
+    build:
+      context: ./services/producto-service
+    container_name: producto-service
+    restart: unless-stopped
+    environment:
+      PRODUCTO_SERVICE_PORT: 8086
+      PRODUCTO_DB_HOST: producto-db
+      PRODUCTO_DB_PORT: 5432
+      PRODUCTO_DB_NAME: ${PRODUCTO_DB_NAME:-tienda_productos}
+      PRODUCTO_DB_USER: ${PRODUCTO_DB_USER:-postgres}
+      PRODUCTO_DB_PASSWORD: ${PRODUCTO_DB_PASSWORD}
+    expose:
+      - "8086"
+    depends_on:
+      producto-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8086/productos', timeout=2)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    environment:
+      GATEWAY_PORT: 8080
+      CATEGORIA_SERVICE_URL: http://categoria-service:8085
+      PRODUCTO_SERVICE_URL: http://producto-service:8086
+      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-*}
+    ports:
+      - "${GATEWAY_HOST_PORT:-8080}:8080"
+    depends_on:
+      categoria-service:
+        condition: service_healthy
+      producto-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/categorias', timeout=2)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    restart: unless-stopped
+    environment:
+      GATEWAY_PUBLIC_URL: ${GATEWAY_PUBLIC_URL:-http://localhost:8080}
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:80"
+    depends_on:
+      - api-gateway
+
+volumes:
+  categoria-db-data:
+  producto-db-data:

@@ -7,7 +7,7 @@ PUERTO = int(os.environ.get("CATEGORIA_SERVICE_PORT", 8085))
 
 
 def main():
-    servidor = HTTPServer(("localhost", PUERTO), CategoriaController)
+    servidor = HTTPServer(("0.0.0.0", PUERTO), CategoriaController)
     print(f"Microservicio de categoria iniciado en http://localhost:{PUERTO}")
     try:
         servidor.serve_forever()
