@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestionar Categoría</title>
+  <link rel="stylesheet" href="estilos.css" />
+</head>
+<body>
+  <div class="contenedor">
+    <div class="encabezado">
+      <div class="icono-titulo">▤</div>
+      <h1>Categorías</h1>
+    </div>
+    <p class="subtitulo">Organiza los productos de tu tienda en categorías</p>
+
+    <div class="barra-herramientas">
+      <div class="campo-busqueda">
+        <input type="text" id="input-busqueda" placeholder="Buscar categoría..." />
+      </div>
+      <button class="btn-primario" id="btn-agregar">+ Agregar categoría</button>
+    </div>
+
+    <table id="tabla-categorias">
+      <thead>
+        <tr><th>Nombre</th><th></th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="modal-overlay" class="oculto"></div>
+  <div id="modal-categoria" class="oculto">
+    <h2 id="titulo-form">Agregar categoría</h2>
+    <form id="form-categoria">
+      <label for="input-nombre">Nombre de la categoría</label>
+      <input type="text" id="input-nombre" placeholder="Ej. Bebidas" required />
+      <div class="acciones-form">
+        <button type="button" class="btn-secundario" id="btn-cancelar">Cancelar</button>
+        <button type="submit" class="btn-primario">Guardar</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toast" class="toast oculto"></div>
+
+  <script src="api-gateway.js"></script>
+  <script src="categoria-adapter.js"></script>
+  <script src="categoria-controlador.js"></script>
+</body>
+</html>
